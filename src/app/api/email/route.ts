@@ -65,23 +65,24 @@ function createAppointmentConfirmationEmail(
     meetLink?: string,
     type?: string,
     appointmentId?: string,
-    refundNote?: string
+    refundNote?: string,
+    baseUrl?: string
 ) {
     // Scott's contact details
     const scottEmail = "scotty.stringer@outlook.com";
     const scottPhone = "0410179900";
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const finalBaseUrl = baseUrl || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     let quickActions = '';
     
     if (type === 'booking_request' && !isForPatient && appointmentId) {
         quickActions = `
         <div style="text-align: center; margin-top: 30px;">
-            <a href="${baseUrl}/api/appointments/action?id=${appointmentId}&action=confirm" 
+            <a href="${finalBaseUrl}/api/appointments/action?id=${appointmentId}&action=confirm" 
                style="display: inline-block; background-color: #16a34a; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 0 10px;">
                 Confirm Booking
             </a>
-            <a href="${baseUrl}/api/appointments/action?id=${appointmentId}&action=reject" 
+            <a href="${finalBaseUrl}/api/appointments/action?id=${appointmentId}&action=reject" 
                style="display: inline-block; background-color: #dc2626; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 0 10px;">
                 Reject Booking
             </a>
@@ -488,6 +489,11 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
 
+        // Construct base URL from request headers for proper deployment URLs
+        const protocol = request.headers.get('x-forwarded-proto') || 'http';
+        const host = request.headers.get('host') || 'localhost:3000';
+        const baseUrl = `${protocol}://${host}`;
+
         // Check if this is an appointment booking email or contact form email
         const isAppointmentBooking = body.patientName && body.appointmentDate;
 
@@ -567,7 +573,7 @@ export async function POST(request: NextRequest) {
 
         // Create professional HTML email content
         const htmlContent = isAppointmentBooking
-            ? createAppointmentConfirmationEmail(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, false, meetLink, type, appointmentId, refundNote)
+            ? createAppointmentConfirmationEmail(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, false, meetLink, type, appointmentId, refundNote, baseUrl)
             : createContactFormEmail(name, email, phone, services, hearAbout, additionalInfo);
 
         // Create plain text version
