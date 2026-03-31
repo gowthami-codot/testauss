@@ -60,7 +60,7 @@ export default function FeeStructure() {
               </div>
 
               {/* Wrapper for the text boxes and the precise vertical Divider */}
-              <div className="relative w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-4 lg:gap-8 max-w-[900px]">
+              <div className="relative w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-4 lg:gap-8 max-w-[900px] sm:mt-0 md:mt-10 lg:mt-0">
                 {/* Center divider line securely locked exactly between the text rows dynamically */}
                 <img
                   src="/MedicareDividerLine.svg"

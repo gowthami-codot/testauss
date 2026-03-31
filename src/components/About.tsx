@@ -14,14 +14,14 @@ export default function About() {
                         src="/scott2.png"
                         alt="Scott"
                         fill
-                        className=" object-cover object-center"
+                        className="object-contain object-center"
                     />
                 </div>
 
                 {/* Content Section */}
                 <div className="w-full xl:w-1/2 text-white">
                     <div className="px-4 border border-white/10 rounded-3xl mb-6 bg-gradient-to-t from-[#5B8DD9]/20 to-transparent" >
-                        <h2 className={`max-xl:text-[72px] text-[128px] font-bold leading-tight ${bebasNeue.className}`}>
+                        <h2 className={`md:max-xl:text-[72px] md:text-[128px] sm:max-xl:text-[52px] text-[62px] font-bold leading-tight ${bebasNeue.className}`}>
                             MEET <span className="text-[#2FAFFF]">SCOTT:</span>
                         </h2>
                     </div>

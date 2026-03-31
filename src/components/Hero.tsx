@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import React from 'react'
 import { Bebas_Neue, Manrope } from 'next/font/google';
 const bebasNeue = Bebas_Neue({ weight: '400', subsets: ['latin'] });
@@ -6,7 +5,7 @@ const manrope = Manrope({ weight: '400', subsets: ['latin'] });
 
 export default function Hero() {
     return (
-        <section className="relative py-16 xl:py-24 px-6 mb-10 xl:px-0 overflow-hidden flex flex-col justify-center">
+        <section className="relative md:py-16 py-10 xl:py-24 px-6 md:mb-10 sm:5 xl:px-0 flex flex-col justify-center">
             <div className="mx-auto flex flex-col-reverse xl:flex-row gap-10 items-center justify-between">
                 {/* Text Content */}
                 <div className={`z-10 mt-8 xl:mt-5 xl:mb-0 text-center xl:text-left ${bebasNeue.className}`}>
@@ -23,13 +22,10 @@ export default function Hero() {
 
                 {/* Profile image */}
                 <div className="w-full flex justify-center items-center z-0">
-                    <Image
+                    <img
                         src="/scott.png"
                         alt="Health care Professional"
-                        width={0}
-                        height={0}
-                        sizes="(min-width: 1280px) 30vw, 60vw"
-                        className="object-cover w-[60vw] h-full xl:w-[30vw] max-w-none"
+                        className="object-contain w-[90vw] max-w-[700px] md:w-[70vw] xl:w-[30vw] h-auto max-h-[80vh]"
                     />
                 </div>
             </div>

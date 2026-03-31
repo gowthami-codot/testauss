@@ -504,11 +504,11 @@ export default function BookingAppointment() {
         <>
             <div className='bg-[#000B1266] w-full flex justify-center p-6 relative xl:mx-20 md:mx-20 mx-auto'>
                 <div className="absolute xl:left-1/16 xl:top-1/2 w-fit xl:-translate-y-1/2 xl:-translate-x-1/2 xl:-rotate-90 md:px-0 px-1 xl:bg-gradient-to-l from-[#006AC0FA]/10 to-transparent text-center xl:text-left mb-10 xl:mb-0  origin-center">
-                    <h1 className={`${bebasNeue.className} text-white/20 max-xl:text-[80px] text-[60px] xl:text-[115px] font-bold md:whitespace-nowrap tracking-[0.02em]`}>
+                    <h1 className={`${bebasNeue.className} text-white/20 md:max-xl:text-[80px] max-xl:text-[50px] md:text-[60px] sm:text-[60px] xl:text-[115px] font-bold md:whitespace-nowrap tracking-[0.02em]`}>
                         BOOK APPOINTMENT
                     </h1>
                 </div>
-                <div className="w-full xl:ml-40 md:ml-0 ml-0 xl:mt-10 md:mt-28 mt-40 max-w-4xl z-10">
+                <div className="w-full xl:ml-40 md:ml-0 ml-0 xl:mt-10 md:mt-28 mt-20 max-w-4xl z-10">
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
                         <div>
                             <h2 className="text-white text-2xl font-semibold mb-6">Select Date</h2>
