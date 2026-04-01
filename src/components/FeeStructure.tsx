@@ -125,7 +125,7 @@ export default function FeeStructure() {
                   },
                   {
                     price: "$16.00",
-                    text: "Quick, Straightforward\nRequest (Simple Issue, Such\nAs A Medical Certificate)",
+                    text: "Quick and simple request — call Scott directly for basic issue.If it is more complex, book a full consultation.",
                   },
                 ].map((card, idx) => (
                   <div
