@@ -110,6 +110,27 @@ export async function POST(request: NextRequest) {
                         hour12: true
                     });
 
+                    // Check if slot is in the past (Brisbane time)
+                    const nowBStr = new Date().toLocaleString('en-US', { timeZone: 'Australia/Brisbane' });
+                    const nowB = new Date(nowBStr);
+
+                    const [timeStr, modifier] = timeSlot.split(' ');
+                    let [slotHrs, slotMins] = timeStr.split(':').map(Number);
+                    if (modifier === 'PM' && slotHrs !== 12) slotHrs += 12;
+                    if (modifier === 'AM' && slotHrs === 12) slotHrs = 0;
+
+                    // 'date' is created from "YYYY-MM-DD", so UTC methods extract the exact local date components
+                    const slotYear = date.getUTCFullYear();
+                    const slotMonth = date.getUTCMonth();
+                    const slotDay = date.getUTCDate();
+                    
+                    const slotDateTimeCompare = new Date(slotYear, slotMonth, slotDay, slotHrs, slotMins, 0, 0);
+                    
+                    if (slotDateTimeCompare < nowB) {
+                        console.log('Skipping slot because it has passed in Australia/Brisbane time:', timeSlot, 'on', date);
+                        continue;
+                    }
+
                     slotsToCreate.push({
                         doctorId,
                         doctorName,

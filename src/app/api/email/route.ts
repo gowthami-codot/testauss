@@ -595,7 +595,7 @@ export async function POST(request: NextRequest) {
         };
 
         let ownerData = null, ownerError = null;
-        if (!isAppointmentBooking || type === 'booking_request') {
+        if (!isAppointmentBooking || type === 'booking_request' || type === 'confirmed') {
             const result = await resend.emails.send(ownerEmailData);
             ownerData = result.data;
             ownerError = result.error;

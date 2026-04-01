@@ -216,9 +216,16 @@ export default function BookingAppointment() {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+        let finalValue = value;
+        
+        // Prevent alphabets in mobile number
+        if (name === 'mobileNumber') {
+            finalValue = finalValue.replace(/\D/g, ''); // Keep only digits
+        }
+
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: finalValue
         }));
 
         // Trigger patient history lookup when email changes
@@ -330,6 +337,7 @@ export default function BookingAppointment() {
 
     const navigateMonth = (direction: 'prev' | 'next') => {
         const newMonth = new Date(currentMonth);
+        newMonth.setDate(1); // Set to 1st of the month to prevent day overflow (e.g. Mar 31 -> Apr 31 -> May 1)
         if (direction === 'prev') {
             newMonth.setMonth(newMonth.getMonth() - 1);
         } else {
@@ -345,7 +353,31 @@ export default function BookingAppointment() {
         if (!availableSlots) return [];
 
         const dateString = dateUtils.formatDateForAPI(date);
-        const slots = availableSlots.slotsByDate[dateString] || [];
+        let slots = availableSlots.slotsByDate[dateString] || [];
+
+        // Filter out past slots today using Australia/Brisbane timezone
+        const nowBrisbaneStr = new Date().toLocaleString('en-US', { timeZone: 'Australia/Brisbane' });
+        const nowBrisbane = new Date(nowBrisbaneStr);
+        
+        // date argument here is local browser date that matches the selected calendar tile.
+        // We only filter if the selected date matches TODAY in Brisbane.
+        if (
+            date.getFullYear() === nowBrisbane.getFullYear() &&
+            date.getMonth() === nowBrisbane.getMonth() &&
+            date.getDate() === nowBrisbane.getDate()
+        ) {
+            const currentHour = nowBrisbane.getHours();
+            const currentMinute = nowBrisbane.getMinutes();
+
+            slots = slots.filter(slot => {
+                const time24 = convertTo24Hour(slot.startTime);
+                const [slotHour, slotMinute] = time24.split(':').map(Number);
+                
+                if (slotHour < currentHour) return false;
+                if (slotHour === currentHour && slotMinute <= currentMinute) return false;
+                return true;
+            });
+        }
 
         // Sort slots by time in chronological order (morning to evening)
         return slots.sort((a, b) => {
@@ -634,7 +666,7 @@ export default function BookingAppointment() {
                                         {/* Mobile Number */}
                                         <div>
                                             <input
-                                                type="text"
+                                                type="tel"
                                                 name="mobileNumber"
                                                 placeholder="Your Mobile Number"
                                                 value={formData.mobileNumber}

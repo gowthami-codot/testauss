@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
                 </html>
             `, { headers: { 'Content-Type': 'text/html' } });
         } else if (appointment.status !== 'pending_confirmation') {
-             return new NextResponse(`
+            return new NextResponse(`
                 <html>
                 <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
                     <h1 style="color: #ca8a04;">Invalid Status</h1>
@@ -117,17 +117,17 @@ export async function GET(request: NextRequest) {
             if (appointment.paymentStatus === 'paid' && appointment.amountPaid > 0 && appointment.stripeSessionId) {
                 try {
                     // Try to retrieve the charge from the session
-                     const session = await stripe.checkout.sessions.retrieve(appointment.stripeSessionId);
-                     if (session.payment_intent) {
+                    const session = await stripe.checkout.sessions.retrieve(appointment.stripeSessionId);
+                    if (session.payment_intent) {
                         await stripe.refunds.create({
                             payment_intent: session.payment_intent as string,
                             amount: appointment.amountPaid * 100 // Stripe expects cents
                         });
                         refundNote = `A Stripe refund of $${appointment.amountPaid} has been initiated.`;
                         appointment.paymentStatus = 'refunded';
-                     } else {
-                         console.error('No payment intent attached to session');
-                     }
+                    } else {
+                        console.error('No payment intent attached to session');
+                    }
                 } catch (err) {
                     console.error('Stripe refund failed:', err);
                     refundNote = `Note: Stripe refund failed. Please adjust manually via dashboard.`;
