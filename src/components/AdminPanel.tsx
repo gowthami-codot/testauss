@@ -171,22 +171,23 @@ export default function AdminPanel() {
         { value: 6, label: 'Saturday' }
     ];
 
-    const generateTodayToNextMonth = () => {
-        const today = new Date();
-        const nextMonth = new Date(today);
+    const generateTomorrowToNextMonth = () => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const nextMonth = new Date(tomorrow);
         nextMonth.setMonth(nextMonth.getMonth() + 1);
 
         return {
-            today: dateUtils.formatDateForAPI(today),
+            tomorrow: dateUtils.formatDateForAPI(tomorrow),
             nextMonth: dateUtils.formatDateForAPI(nextMonth)
         };
     };
 
     const quickFill = () => {
-        const { today, nextMonth } = generateTodayToNextMonth();
+        const { tomorrow, nextMonth } = generateTomorrowToNextMonth();
         setFormData(prev => ({
             ...prev,
-            startDate: today,
+            startDate: tomorrow,
             endDate: nextMonth,
             excludeDays: [0, 6] // Exclude Sunday and Saturday
         }));
@@ -242,7 +243,7 @@ export default function AdminPanel() {
                                 name="startDate"
                                 value={formData.startDate}
                                 onChange={handleInputChange}
-                                min={dateUtils.formatDateForAPI(new Date())}
+                                min={dateUtils.formatDateForAPI(new Date(new Date().setDate(new Date().getDate() + 1)))}
                                 className="w-full px-3 py-2 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required
                             />
@@ -257,7 +258,7 @@ export default function AdminPanel() {
                                 name="endDate"
                                 value={formData.endDate}
                                 onChange={handleInputChange}
-                                min={formData.startDate || dateUtils.formatDateForAPI(new Date())}
+                                min={formData.startDate || dateUtils.formatDateForAPI(new Date(new Date().setDate(new Date().getDate() + 1)))}
                                 className="w-full px-3 py-2 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required
                             />
@@ -430,7 +431,7 @@ export default function AdminPanel() {
                             onClick={quickFill}
                             className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
                         >
-                            Quick Fill (Today to Next Month, Weekdays Only)
+                            Quick Fill (Tomorrow to Next Month, Weekdays Only)
                         </button>
                     </div>
 
