@@ -79,10 +79,34 @@ export default function AdminPanel() {
                 });
                 return;
             }
-        }
+        }        // Confirmation dialog
+        const sessionText = formData.sessionType === 'both'
+            ? `Morning: ${formData.morningStartTime} - ${formData.morningEndTime}<br/>Evening: ${formData.eveningStartTime} - ${formData.eveningEndTime}`
+            : formData.sessionType === 'morning'
+                ? `Morning: ${formData.morningStartTime} - ${formData.morningEndTime}`
+                : `Evening: ${formData.eveningStartTime} - ${formData.eveningEndTime}`;
 
+        const result = await Swal.fire({
+            icon: 'question',
+            title: 'Create Appointment Slots?',
+            html: `
+                <div style="text-align: center; margin: 20px 0;">
+                    <p><strong>Date Range:</strong> ${formData.startDate} to ${formData.endDate}</p>
+                    <p><strong>Session(s):</strong></p>
+                    <div style="margin-left: 20px;">${sessionText}</div>
+                    <p><strong>Duration:</strong> ${formData.duration} minutes per slot</p>
+                </div>
+            `,
+            background: '#1f2937',
+            color: '#fff',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, Create Slots',
+            cancelButtonText: 'Cancel'
+        });
 
-
+        if (!result.isConfirmed) return;
         try {
             setIsLoading(true);
 

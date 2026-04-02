@@ -62,7 +62,7 @@ export default function FeeStructure() {
                   className={`flex flex-col items-center justify-start text-center ${manrope500.className} w-full max-w-[299px] mx-auto relative z-10`}
                 >
                   <p className="text-[#E6F6FF] opacity-80 text-[16px] leading-[24px] md:text-[20px] md:leading-[28px] lg:text-[24px] lg:leading-[32px] tracking-[0%]">
-                    Eligible services are 100% bulk-billed, meaning there is no out-of-pocket cost where Medicare criteria are met
+                    Eligible services are 100% bulk-billed, meaning there is no out-of-pocket cost where Medicare criteria are met.
                   </p>
                 </div>
 
@@ -70,7 +70,7 @@ export default function FeeStructure() {
                   className={`flex flex-col items-center justify-start text-center ${manrope500.className} w-full max-w-[299px] mx-auto relative z-10`}
                 >
                   <p className="text-[#E6F6FF] opacity-80 text-[16px] leading-[24px] md:text-[20px] md:leading-[28px] lg:text-[24px] lg:leading-[32px] tracking-[0%]">
-                    To remain eligible for Medicare bulk-billing, Scott must see you in person at least once per calendar year.  Otherwise, the full-fee applies
+                    To remain eligible for Medicare bulk-billing, Scott must see you in person at least once per calendar year. Otherwise, the full-fee applies.
                   </p>
                 </div>
               </div>
@@ -104,18 +104,16 @@ export default function FeeStructure() {
                 {[
                   {
                     price: "$16.00",
-                    text: "Quick, straightforward \nissues (e.g. medical certificates).",
+                    text: "Quick, straightforward issues (e.g. medical certificates).",
                   },
                   {
                     price: "$32.00",
-                    text: "Follow-up visits  Or\nfocused assessment\nand treatments",
+                    text: "Follow-up visits or focused assessments and treatments.",
                   },
                   {
                     price: "$64.00",
-                    text: "New patient consults ,\nor more comprehensive\nassessments and care",
+                    text: "New patient consults or more comprehensive assessments and care",
                   },
-
-
                 ].map((card, idx) => (
                   <div
                     // eslint-disable-next-line react/no-array-index-key
