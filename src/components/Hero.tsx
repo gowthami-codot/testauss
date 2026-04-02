@@ -5,7 +5,7 @@ const manrope = Manrope({ weight: '400', subsets: ['latin'] });
 
 export default function Hero() {
     return (
-        <section className="relative md:py-16 py-10 xl:py-24 px-6 md:mb-10 sm:5 xl:px-0 flex flex-col justify-center">
+        <section className="relative md:py-16 py-10 xl:py-24 px-6 md:mb-10 sm:5 xl:px-0 flex flex-col justify-center overflow-hidden">
             <div className="mx-auto flex flex-col-reverse xl:flex-row gap-10 items-center justify-between">
                 {/* Text Content */}
                 <div className={`z-10 mt-8 xl:mt-5 xl:mb-0 text-center xl:text-left ${bebasNeue.className}`}>
