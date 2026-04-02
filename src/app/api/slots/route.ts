@@ -97,21 +97,39 @@ export async function POST(request: NextRequest) {
                 continue;
             }
 
-            for (const timeSlot of timeSlots) {
-                // Check if slot already exists
-                const existingSlot = await Slot.findOne({
-                    doctorId,
-                    date: {
-                        $gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-                        $lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
-                    },
-                    startTime: timeSlot
-                });
+            // Fetch all existing slots for this doctor on this day
+            const existingSlotsForDay = await Slot.find({
+                doctorId,
+                date: {
+                    $gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
+                    $lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+                }
+            });
 
-                if (!existingSlot) {
-                    // Calculate the end time for this slot
-                    const slotStart = new Date(`2000-01-01 ${timeSlot}`);
-                    const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000);
+            // Convert existing slots to numerical time ranges for easy overlap checking
+            const existingRanges = existingSlotsForDay.map(slot => {
+                return {
+                    start: new Date(`2000-01-01 ${slot.startTime}`).getTime(),
+                    end: new Date(`2000-01-01 ${slot.endTime}`).getTime()
+                };
+            });
+
+            for (const timeSlot of timeSlots) {
+                const slotStart = new Date(`2000-01-01 ${timeSlot}`);
+                const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000);
+                const slotStartMs = slotStart.getTime();
+                const slotEndMs = slotEnd.getTime();
+
+                // Check for overlaps
+                let hasOverlap = false;
+                for (const range of existingRanges) {
+                    if (Math.max(slotStartMs, range.start) < Math.min(slotEndMs, range.end)) {
+                        hasOverlap = true;
+                        break;
+                    }
+                }
+
+                if (!hasOverlap) {
                     const endTimeString = slotEnd.toLocaleTimeString('en-US', {
                         hour: '2-digit',
                         minute: '2-digit',

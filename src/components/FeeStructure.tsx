@@ -40,27 +40,17 @@ export default function FeeStructure() {
 
         {/* Medicare card */}
         <div className="mt-8 flex justify-center px-4 w-full">
-          <div className="relative max-w-[1166px] w-full max-xl:min-h-[400px] xl:aspect-[1166/552] overflow-hidden border border-white/30 backdrop-blur-3xl flex flex-col items-center justify-center py-12 lg:py-[90px]">
+          <div className="relative max-w-[1166px] w-full min-h-[250px] md:min-h-[300px] overflow-hidden border border-white/30 backdrop-blur-3xl flex flex-col items-center justify-center py-12 lg:py-[60px]">
             {/* Background image covering the grid gracefully - fill strictly on mobile to retain entire borders, contain natively mapped to strict aspect ratio globally elsewhere! */}
             <img
               src="/MedicareCard.svg"
               alt=""
-              className="absolute inset-0 w-full h-full object-cover xl:object-contain pointer-events-none opacity-80"
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-80"
             />
 
-            <div className="relative z-10 text-center w-full px-4 flex flex-col items-center justify-start h-full">
-              <div className="w-full max-w-[686px] mb-8 md:mb-6 lg:mb-[60px]">
-                <div
-                  className={`${manrope600.className} text-[#D7F4FE] text-[32px] leading-[40px] sm:text-[40px] sm:leading-[48px] md:text-[56px] md:leading-[64px] lg:text-[80px] lg:leading-[80px] font-semibold tracking-[-0.05em]`}
-                >
-                  Bulk Billed Care,
-                  <br />
-                  Zero Out of Pocket
-                </div>
-              </div>
-
+            <div className="relative z-10 text-center w-full px-4 flex flex-col items-center justify-center h-full">
               {/* Wrapper for the text boxes and the precise vertical Divider */}
-              <div className="relative w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-4 lg:gap-8 max-w-[900px] sm:mt-0 md:mt-10 lg:mt-0">
+              <div className="relative w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-4 lg:gap-8 max-w-[900px]">
                 {/* Center divider line securely locked exactly between the text rows dynamically */}
                 <img
                   src="/MedicareDividerLine.svg"
@@ -72,8 +62,7 @@ export default function FeeStructure() {
                   className={`flex flex-col items-center justify-start text-center ${manrope500.className} w-full max-w-[299px] mx-auto relative z-10`}
                 >
                   <p className="text-[#E6F6FF] opacity-80 text-[16px] leading-[24px] md:text-[20px] md:leading-[28px] lg:text-[24px] lg:leading-[32px] tracking-[0%]">
-                    Eligible Services Are 100% Bulk Billed, Meaning There Is No
-                    Out-Of-Pocket Cost Where Medicare Criteria Are Met.
+                    Eligible services are 100% bulk-billed, meaning there is no out-of-pocket cost where Medicare criteria are met
                   </p>
                 </div>
 
@@ -81,9 +70,7 @@ export default function FeeStructure() {
                   className={`flex flex-col items-center justify-start text-center ${manrope500.className} w-full max-w-[299px] mx-auto relative z-10`}
                 >
                   <p className="text-[#E6F6FF] opacity-80 text-[16px] leading-[24px] md:text-[20px] md:leading-[28px] lg:text-[24px] lg:leading-[32px] tracking-[0%]">
-                    To Remain Eligible For Medicare Bulk Billing, Scott Must See
-                    You In Person At Least Once Per Calendar Year, Otherwise,
-                    The Full-Fee Applies.
+                    To remain eligible for Medicare bulk-billing, Scott must see you in person at least once per calendar year.  Otherwise, the full-fee applies
                   </p>
                 </div>
               </div>
@@ -116,17 +103,19 @@ export default function FeeStructure() {
               <div className="relative z-10 flex flex-row flex-wrap justify-center items-center gap-6 lg:gap-10 xl:gap-14 pt-10 md:pt-12 pb-[60px] md:pb-[110px] max-w-[1166px] mx-auto">
                 {[
                   {
-                    price: "$64.00",
-                    text: "New Patient Consultation,\nIncluding Comprehensive\nMedical History And\nAssessment",
+                    price: "$16.00",
+                    text: "Quick, straightforward \nissues (e.g. medical certificates).",
                   },
                   {
                     price: "$32.00",
-                    text: "Follow Up Consultation Or\nFocused Assessment/\nIntervention",
+                    text: "Follow-up visits  Or\nfocused assessment\nand treatments",
                   },
                   {
-                    price: "$16.00",
-                    text: "Quick and simple request — call Scott directly for basic issue.If it is more complex, book a full consultation.",
+                    price: "$64.00",
+                    text: "New patient consults ,\nor more comprehensive\nassessments and care",
                   },
+
+
                 ].map((card, idx) => (
                   <div
                     // eslint-disable-next-line react/no-array-index-key
