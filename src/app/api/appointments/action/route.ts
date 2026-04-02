@@ -74,6 +74,31 @@ export async function GET(request: NextRequest) {
         }
 
         if (action === 'confirm') {
+            const force = searchParams.get('force');
+            if (force !== 'true') {
+                const conflictingAppointment = await Appointment.findOne({
+                    slotId: appointment.slotId,
+                    status: 'confirmed',
+                    _id: { $ne: appointment._id }
+                });
+
+                if (conflictingAppointment) {
+                    return new NextResponse(`
+                        <html>
+                        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #fffbeb;">
+                            <h1 style="color: #d97706;">Conflict Detected</h1>
+                            <p>You have a session with another patient - <strong>${conflictingAppointment.patientName}</strong> in this time slot.</p>
+                            <p>Do you still want to confirm?</p>
+                            <div style="margin-top: 30px;">
+                                <a href="${getBaseUrl()}/api/appointments/action?id=${id}&action=confirm&force=true" style="display: inline-block; background-color: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-right: 15px;">Confirm</a>
+                                <a href="${getBaseUrl()}/api/appointments/action?id=${id}&action=reject" style="display: inline-block; background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Reject</a>
+                            </div>
+                        </body>
+                        </html>
+                    `, { headers: { 'Content-Type': 'text/html' } });
+                }
+            }
+
             appointment.status = 'confirmed';
             await appointment.save();
 

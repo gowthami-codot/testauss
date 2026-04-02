@@ -76,11 +76,8 @@ export async function POST(request: NextRequest) {
                     return NextResponse.json({ received: true });
                 }
 
-                if (!slot.isAvailable) {
-                    console.error('Webhook: Slot no longer available:', slotId);
-                    await dbSession.abortTransaction();
-                    return NextResponse.json({ received: true });
-                }
+                // We no longer abort if slot is unavailable because the payment has already been processed by Stripe.
+                // We will create the appointment and let the doctor arbitrate conflicts.
 
                 // Generate meet link for video consultations
                 let meetLink: string | undefined;
