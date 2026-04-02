@@ -587,7 +587,7 @@ export async function POST(request: NextRequest) {
         // Email to owner
         const ownerEmailData = {
             from: verifiedSender,
-            to: ['gowthami.codot@gmail.com'],
+            to: ['scotty.stringer@outlook.com'],
             replyTo: email,
             subject: subject,
             html: htmlContent,
