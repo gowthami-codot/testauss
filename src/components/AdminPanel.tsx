@@ -52,6 +52,35 @@ export default function AdminPanel() {
             return;
         }
 
+        // Validate time ranges
+        if (formData.sessionType === 'morning' || formData.sessionType === 'both') {
+            if (formData.morningStartTime >= formData.morningEndTime) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Morning Time',
+                    text: 'Morning start time must be before end time',
+                    background: '#1f2937',
+                    color: '#fff',
+                    confirmButtonColor: '#f59e0b'
+                });
+                return;
+            }
+        }
+
+        if (formData.sessionType === 'evening' || formData.sessionType === 'both') {
+            if (formData.eveningStartTime >= formData.eveningEndTime) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Evening Time',
+                    text: 'Evening start time must be before end time',
+                    background: '#1f2937',
+                    color: '#fff',
+                    confirmButtonColor: '#f59e0b'
+                });
+                return;
+            }
+        }
+
         // Confirmation dialog
         const sessionText = formData.sessionType === 'both'
             ? `Morning: ${formData.morningStartTime} - ${formData.morningEndTime}<br/>Evening: ${formData.eveningStartTime} - ${formData.eveningEndTime}`

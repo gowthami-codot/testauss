@@ -168,6 +168,17 @@ export default function BookingAppointment() {
             });
             return;
         }
+        if (formData.mobileNumber.length < 9) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Mobile Number',
+                text: 'Please enter a valid mobile number with at least 9 digits.',
+                background: '#1f2937',
+                color: '#fff',
+                confirmButtonColor: '#f59e0b'
+            });
+            return;
+        }
         setModalStep('billing');
     };
 
@@ -217,7 +228,7 @@ export default function BookingAppointment() {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         let finalValue = value;
-        
+
         // Prevent alphabets in mobile number
         if (name === 'mobileNumber') {
             finalValue = finalValue.replace(/\D/g, ''); // Keep only digits
@@ -358,7 +369,7 @@ export default function BookingAppointment() {
         // Filter out past slots today using Australia/Brisbane timezone
         const nowBrisbaneStr = new Date().toLocaleString('en-US', { timeZone: 'Australia/Brisbane' });
         const nowBrisbane = new Date(nowBrisbaneStr);
-        
+
         // date argument here is local browser date that matches the selected calendar tile.
         // We only filter if the selected date matches TODAY in Brisbane.
         if (
@@ -372,7 +383,7 @@ export default function BookingAppointment() {
             slots = slots.filter(slot => {
                 const time24 = convertTo24Hour(slot.startTime);
                 const [slotHour, slotMinute] = time24.split(':').map(Number);
-                
+
                 if (slotHour < currentHour) return false;
                 if (slotHour === currentHour && slotMinute <= currentMinute) return false;
                 return true;
@@ -839,8 +850,8 @@ export default function BookingAppointment() {
                                                     onClick={handleBookAppointment}
                                                     disabled={isLoading}
                                                     className={`px-6 py-3 font-semibold transition-all duration-300 cursor-pointer ${isLoading
-                                                            ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
-                                                            : 'bg-gradient-to-br from-[#0583F4] to-[#09B9AC] hover:bg-gradient-to-tl hover:from-[#09B9AC] hover:to-[#0583F4] text-white'
+                                                        ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                                                        : 'bg-gradient-to-br from-[#0583F4] to-[#09B9AC] hover:bg-gradient-to-tl hover:from-[#09B9AC] hover:to-[#0583F4] text-white'
                                                         }`}
                                                 >
                                                     {isLoading

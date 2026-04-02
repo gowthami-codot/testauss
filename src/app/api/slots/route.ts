@@ -69,6 +69,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        if (startTime >= endTime) {
+            console.log('Invalid time range:', { startTime, endTime });
+            return NextResponse.json(
+                { error: 'Start time must be before end time' },
+                { status: 400 }
+            );
+        }
+
         console.log('Generating date range...');
         // Generate date range
         const dates = getDateRange(startDate, endDate);
