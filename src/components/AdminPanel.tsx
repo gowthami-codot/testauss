@@ -81,34 +81,7 @@ export default function AdminPanel() {
             }
         }
 
-        // Confirmation dialog
-        const sessionText = formData.sessionType === 'both'
-            ? `Morning: ${formData.morningStartTime} - ${formData.morningEndTime}<br/>Evening: ${formData.eveningStartTime} - ${formData.eveningEndTime}`
-            : formData.sessionType === 'morning'
-                ? `Morning: ${formData.morningStartTime} - ${formData.morningEndTime}`
-                : `Evening: ${formData.eveningStartTime} - ${formData.eveningEndTime}`;
 
-        const result = await Swal.fire({
-            icon: 'question',
-            title: 'Create Appointment Slots?',
-            html: `
-                <div style="text-align: center; margin: 20px 0;">
-                    <p><strong>Date Range:</strong> ${formData.startDate} to ${formData.endDate}</p>
-                    <p><strong>Session(s):</strong></p>
-                    <div style="margin-left: 20px;">${sessionText}</div>
-                    <p><strong>Duration:</strong> ${formData.duration} minutes per slot</p>
-                </div>
-            `,
-            background: '#1f2937',
-            color: '#fff',
-            showCancelButton: true,
-            confirmButtonColor: '#10b981',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, Create Slots',
-            cancelButtonText: 'Cancel'
-        });
-
-        if (!result.isConfirmed) return;
 
         try {
             setIsLoading(true);
@@ -149,22 +122,41 @@ export default function AdminPanel() {
                 `<p><strong>${r.type} Slots:</strong> ${r.result.message}</p>`
             ).join('');
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Slots Created Successfully!',
-                html: `
-                    <div style="text-align: center; margin: 20px 0;">
-                        ${successMessage}
-                    </div>
-                `,
-                background: '#1f2937',
-                color: '#fff',
-                confirmButtonColor: '#10b981',
-                confirmButtonText: 'Great!',
-                timer: 5000,
-                timerProgressBar: true,
-                showConfirmButton: true
-            });
+            const totalCreated = results.reduce((acc, r) => acc + (r.result.count || 0), 0);
+
+            if (totalCreated === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'No New Slots Created',
+                    html: `
+                        <div style="text-align: center; margin: 20px 0;">
+                            ${successMessage}
+                        </div>
+                    `,
+                    background: '#1f2937',
+                    color: '#fff',
+                    confirmButtonColor: '#3b82f6',
+                    confirmButtonText: 'Okay',
+                    showConfirmButton: true
+                });
+            } else {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Slots Created Successfully!',
+                    html: `
+                        <div style="text-align: center; margin: 20px 0;">
+                            ${successMessage}
+                        </div>
+                    `,
+                    background: '#1f2937',
+                    color: '#fff',
+                    confirmButtonColor: '#10b981',
+                    confirmButtonText: 'Great!',
+                    timer: 5000,
+                    timerProgressBar: true,
+                    showConfirmButton: true
+                });
+            }
 
             // Reset form
             setFormData(prev => ({

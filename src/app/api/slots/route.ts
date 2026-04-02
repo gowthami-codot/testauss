@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
 
         if (slotsToCreate.length === 0) {
             return NextResponse.json(
-                { message: 'No new slots to create (slots may already exist)' },
+                { message: 'No new slots to create (slots may already exist)', count: 0 },
                 { status: 200 }
             );
         }
@@ -168,7 +168,8 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             message: `Successfully created ${createdSlots.length} slots`,
-            slots: createdSlots
+            slots: createdSlots,
+            count: createdSlots.length
         }, { status: 201 });
 
     } catch (error) {
