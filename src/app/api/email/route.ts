@@ -74,7 +74,7 @@ function createAppointmentConfirmationEmail(
 
     const finalBaseUrl = baseUrl || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     let quickActions = '';
-    
+
     if (type === 'booking_request' && !isForPatient && appointmentId) {
         quickActions = `
         <div style="text-align: center; margin-top: 30px;">
@@ -116,12 +116,12 @@ function createAppointmentConfirmationEmail(
         `;
     }
 
-    let badgeContent = type === 'rejected' 
+    let badgeContent = type === 'rejected'
         ? '<span style="background-color: #fef2f2; color: #dc2626; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; border: 2px solid #dc2626;">✗ Appointment Rejected</span>'
-        : type === 'booking_request' 
+        : type === 'booking_request'
             ? '<span style="background-color: #fef3c7; color: #d97706; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; border: 2px solid #d97706;">⌛ Booking Request Pending</span>'
             : '<span style="background-color: #dcfce7; color: #16a34a; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; border: 2px solid #16a34a;">✓ Appointment Confirmed</span>';
-    
+
     let headerText = type === 'rejected' ? 'Appointment Rejected' : type === 'booking_request' ? 'New Booking Request' : 'Appointment Confirmation';
 
     let actionRequiredText = 'Please prepare for the appointment and confirm attendance if required.';
@@ -129,7 +129,7 @@ function createAppointmentConfirmationEmail(
     let actionBoxStyle = 'background-color: #fef3c7; border: 1px solid #f59e0b; color: #92400e;';
     let actionTitleColor = '#92400e';
     let actionTextColor = '#92400e';
-    
+
     if (type === 'booking_request' && isForPatient) {
         actionRequiredTitle = 'ℹ️ Booking Status';
         actionRequiredText = 'Your payment has been successfully processed. Your appointment is currently pending confirmation from Scott. If Scott approves, you will receive a confirmation email. If Scott rejects your appointment, your payment will be refunded to your original payment method automatically within 5-10 business days.';
@@ -587,7 +587,7 @@ export async function POST(request: NextRequest) {
         // Email to owner
         const ownerEmailData = {
             from: verifiedSender,
-            to: ['gowthami.codot@gmail.com'],
+            to: ['scotty.stringer@outlook.com'],
             replyTo: email,
             subject: subject,
             html: htmlContent,
@@ -608,7 +608,7 @@ export async function POST(request: NextRequest) {
             let userSubject = `Your Appointment is Confirmed - ${services} with ${doctorName} - AussieMale`;
             if (type === 'rejected') userSubject = `Your Appointment is Rejected - ${services} with ${doctorName} - AussieMale`;
             if (type === 'booking_request') userSubject = `Your Booking Request is Processing - ${services} with ${doctorName} - AussieMale`;
-                
+
             const userHtmlContent = createAppointmentConfirmationEmail(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, true, meetLink, type, appointmentId, refundNote);
             const userTextContent = createAppointmentTextContent(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, meetLink, type);
             const userEmailData = {
