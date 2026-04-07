@@ -6,7 +6,12 @@ import { Slot } from '@/models';
 function generateTimeSlots(startTime: string, endTime: string, duration: number = 60): string[] {
     const slots: string[] = [];
     const start = new Date(`2000-01-01 ${startTime}`);
-    const end = new Date(`2000-01-01 ${endTime}`);
+    let end = new Date(`2000-01-01 ${endTime}`);
+
+    // If endTime is 00:00 (midnight), it represents the start of the next day
+    if (endTime === '00:00' && startTime >= '00:00') {
+        end = new Date(`2000-01-02 00:00:00`);
+    }
 
     let current = new Date(start);
 
@@ -69,7 +74,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (startTime >= endTime) {
+        if (startTime >= endTime && endTime !== '00:00') {
             console.log('Invalid time range:', { startTime, endTime });
             return NextResponse.json(
                 { error: 'Start time must be before end time' },
@@ -88,6 +93,8 @@ export async function POST(request: NextRequest) {
         console.log('Time slots generated:', timeSlots);
 
         const slotsToCreate = [];
+        let skippedBecausePast = 0;
+        let skippedBecauseOverlap = 0;
 
         console.log('Processing dates and time slots...');
         for (const date of dates) {
@@ -110,7 +117,7 @@ export async function POST(request: NextRequest) {
             const existingRanges = existingSlotsForDay.map(slot => {
                 return {
                     start: new Date(`2000-01-01 ${slot.startTime}`).getTime(),
-                    end: new Date(`2000-01-01 ${slot.endTime}`).getTime()
+                    end: new Date(`2000-01-01 ${slot.endTime === '00:00' ? '24:00' : slot.endTime}`).getTime()
                 };
             });
 
@@ -130,11 +137,16 @@ export async function POST(request: NextRequest) {
                 }
 
                 if (!hasOverlap) {
-                    const endTimeString = slotEnd.toLocaleTimeString('en-US', {
+                    let endTimeString = slotEnd.toLocaleTimeString('en-US', {
                         hour: '2-digit',
                         minute: '2-digit',
                         hour12: true
                     });
+                    
+                    // Standardize midnight output
+                    if (endTimeString.match(/^12:00 AM/i)) {
+                        endTimeString = "12:00 AM";
+                    }
 
                     // Check if slot is in the past (Brisbane time)
                     const nowBStr = new Date().toLocaleString('en-US', { timeZone: 'Australia/Brisbane' });
@@ -154,6 +166,7 @@ export async function POST(request: NextRequest) {
                     
                     if (slotDateTimeCompare < nowB) {
                         console.log('Skipping slot because it has passed in Australia/Brisbane time:', timeSlot, 'on', date);
+                        skippedBecausePast++;
                         continue;
                     }
 
@@ -166,6 +179,8 @@ export async function POST(request: NextRequest) {
                         duration,
                         isAvailable: true
                     });
+                } else {
+                    skippedBecauseOverlap++;
                 }
             }
         }
@@ -173,8 +188,15 @@ export async function POST(request: NextRequest) {
         console.log('Slots to create:', slotsToCreate.length);
 
         if (slotsToCreate.length === 0) {
+            let message = 'No new slots to create (slots may already exist)';
+            if (skippedBecausePast > 0 && skippedBecauseOverlap === 0) {
+                message = 'Cannot create slots for passed date and time.';
+            } else if (skippedBecausePast > 0 && skippedBecauseOverlap > 0) {
+                message = 'No new slots created (some times passed, others already exist).';
+            }
+
             return NextResponse.json(
-                { message: 'No new slots to create (slots may already exist)', count: 0 },
+                { message, count: 0 },
                 { status: 200 }
             );
         }

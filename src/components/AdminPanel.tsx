@@ -52,9 +52,25 @@ export default function AdminPanel() {
             return;
         }
 
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = dateUtils.formatDateForAPI(tomorrow);
+
+        if (formData.startDate < tomorrowStr) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Start Date',
+                text: 'Appointment slots can only be created from tomorrow onwards',
+                background: '#1f2937',
+                color: '#fff',
+                confirmButtonColor: '#f59e0b'
+            });
+            return;
+        }
+
         // Validate time ranges
         if (formData.sessionType === 'morning' || formData.sessionType === 'both') {
-            if (formData.morningStartTime >= formData.morningEndTime) {
+            if (formData.morningStartTime >= formData.morningEndTime && formData.morningEndTime !== '00:00') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Invalid Morning Time',
@@ -68,7 +84,7 @@ export default function AdminPanel() {
         }
 
         if (formData.sessionType === 'evening' || formData.sessionType === 'both') {
-            if (formData.eveningStartTime >= formData.eveningEndTime) {
+            if (formData.eveningStartTime >= formData.eveningEndTime && formData.eveningEndTime !== '00:00') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Invalid Evening Time',
