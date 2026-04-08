@@ -60,14 +60,19 @@ export async function GET(request: NextRequest) {
             if (!slotsByDate[dateKey]) {
                 slotsByDate[dateKey] = [];
             }
-            slotsByDate[dateKey].push({
-                _id: slot._id,
-                doctorId: slot.doctorId,
-                doctorName: slot.doctorName,
-                startTime: slot.startTime,
-                endTime: slot.endTime,
-                duration: slot.duration
-            });
+            
+            // Fix existing duplicate slots natively at the source response level
+            const isDuplicate = slotsByDate[dateKey].some(s => s.startTime === slot.startTime);
+            if (!isDuplicate) {
+                slotsByDate[dateKey].push({
+                    _id: slot._id,
+                    doctorId: slot.doctorId,
+                    doctorName: slot.doctorName,
+                    startTime: slot.startTime,
+                    endTime: slot.endTime,
+                    duration: slot.duration
+                });
+            }
         });
 
         // Also provide an array of available dates for calendar highlighting

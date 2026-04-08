@@ -390,6 +390,18 @@ export default function BookingAppointment() {
             });
         }
 
+        // Deduplicate slots by start time
+        const uniqueSlots = [];
+        const seenTimes = new Set();
+        
+        for (const slot of slots) {
+            if (!seenTimes.has(slot.startTime)) {
+                seenTimes.add(slot.startTime);
+                uniqueSlots.push(slot);
+            }
+        }
+        slots = uniqueSlots;
+
         // Sort slots by time in chronological order (morning to evening)
         return slots.sort((a, b) => {
             // Convert time strings to comparable format
