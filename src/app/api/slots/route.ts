@@ -8,9 +8,9 @@ function generateTimeSlots(startTime: string, endTime: string, duration: number 
     const start = new Date(`2000-01-01 ${startTime}`);
     let end = new Date(`2000-01-01 ${endTime}`);
 
-    // If endTime is 00:00 (midnight), it represents the start of the next day
-    if (endTime === '00:00' && startTime >= '00:00') {
-        end = new Date(`2000-01-02 00:00:00`);
+    // If endTime <= startTime, it represents an overnight session wrapping to the next day
+    if (end <= start) {
+        end = new Date(`2000-01-02 ${endTime}`);
     }
 
     let current = new Date(start);
@@ -74,13 +74,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (startTime >= endTime && endTime !== '00:00') {
-            console.log('Invalid time range:', { startTime, endTime });
-            return NextResponse.json(
-                { error: 'Start time must be before end time' },
-                { status: 400 }
-            );
-        }
+
 
         console.log('Generating date range...');
         // Generate date range
@@ -104,20 +98,24 @@ export async function POST(request: NextRequest) {
                 continue;
             }
 
-            // Fetch all existing slots for this doctor on this day
+            // Fetch all existing slots for this doctor on this day AND the next day to handle overnight overlaps
             const existingSlotsForDay = await Slot.find({
                 doctorId,
                 date: {
                     $gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-                    $lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+                    $lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 2)
                 }
             });
 
             // Convert existing slots to numerical time ranges for easy overlap checking
             const existingRanges = existingSlotsForDay.map(slot => {
+                // If it's a nextDay slot, we add 24h to its start/end time for range comparison
+                const isNextDaySlot = slot.date.getTime() > date.getTime();
+                const offset = isNextDaySlot ? 24 * 60 * 60 * 1000 : 0;
+                
                 return {
-                    start: new Date(`2000-01-01 ${slot.startTime}`).getTime(),
-                    end: new Date(`2000-01-01 ${slot.endTime === '00:00' ? '24:00' : slot.endTime}`).getTime()
+                    start: new Date(`2000-01-01 ${slot.startTime}`).getTime() + offset,
+                    end: new Date(`2000-01-01 ${slot.endTime === '00:00' ? '24:00' : slot.endTime}`).getTime() + offset
                 };
             });
 
@@ -148,24 +146,32 @@ export async function POST(request: NextRequest) {
                         endTimeString = "12:00 AM";
                     }
 
-                    // Check if slot is in the past (Brisbane time)
-                    const nowBStr = new Date().toLocaleString('en-US', { timeZone: 'Australia/Brisbane' });
-                    const nowB = new Date(nowBStr);
-
                     const [timeStr, modifier] = timeSlot.split(' ');
                     let [slotHrs, slotMins] = timeStr.split(':').map(Number);
                     if (modifier === 'PM' && slotHrs !== 12) slotHrs += 12;
                     if (modifier === 'AM' && slotHrs === 12) slotHrs = 0;
 
+                    const [reqStartHr, reqStartMin] = startTime.split(':').map(Number);
+                    const isNextDay = slotHrs < reqStartHr || (slotHrs === reqStartHr && slotMins < reqStartMin);
+
+                    const actualDate = new Date(date);
+                    if (isNextDay) {
+                        actualDate.setDate(actualDate.getDate() + 1);
+                    }
+
+                    // Check if slot is in the past (Brisbane time)
+                    const nowBStr = new Date().toLocaleString('en-US', { timeZone: 'Australia/Brisbane' });
+                    const nowB = new Date(nowBStr);
+
                     // 'date' is created from "YYYY-MM-DD", so UTC methods extract the exact local date components
-                    const slotYear = date.getUTCFullYear();
-                    const slotMonth = date.getUTCMonth();
-                    const slotDay = date.getUTCDate();
+                    const slotYear = actualDate.getUTCFullYear();
+                    const slotMonth = actualDate.getUTCMonth();
+                    const slotDay = actualDate.getUTCDate();
                     
                     const slotDateTimeCompare = new Date(slotYear, slotMonth, slotDay, slotHrs, slotMins, 0, 0);
                     
                     if (slotDateTimeCompare < nowB) {
-                        console.log('Skipping slot because it has passed in Australia/Brisbane time:', timeSlot, 'on', date);
+                        console.log('Skipping slot because it has passed in Australia/Brisbane time:', timeSlot, 'on', actualDate);
                         skippedBecausePast++;
                         continue;
                     }
@@ -173,7 +179,7 @@ export async function POST(request: NextRequest) {
                     slotsToCreate.push({
                         doctorId,
                         doctorName,
-                        date,
+                        date: actualDate,
                         startTime: timeSlot,
                         endTime: endTimeString,
                         duration,

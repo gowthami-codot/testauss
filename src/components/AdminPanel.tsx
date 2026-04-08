@@ -52,50 +52,8 @@ export default function AdminPanel() {
             return;
         }
 
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const tomorrowStr = dateUtils.formatDateForAPI(tomorrow);
-
-        if (formData.startDate < tomorrowStr) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Invalid Start Date',
-                text: 'Appointment slots can only be created from tomorrow onwards',
-                background: '#1f2937',
-                color: '#fff',
-                confirmButtonColor: '#f59e0b'
-            });
-            return;
-        }
-
-        // Validate time ranges
-        if (formData.sessionType === 'morning' || formData.sessionType === 'both') {
-            if (formData.morningStartTime >= formData.morningEndTime && formData.morningEndTime !== '00:00') {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Morning Time',
-                    text: 'Morning start time must be before end time',
-                    background: '#1f2937',
-                    color: '#fff',
-                    confirmButtonColor: '#f59e0b'
-                });
-                return;
-            }
-        }
-
-        if (formData.sessionType === 'evening' || formData.sessionType === 'both') {
-            if (formData.eveningStartTime >= formData.eveningEndTime && formData.eveningEndTime !== '00:00') {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Evening Time',
-                    text: 'Evening start time must be before end time',
-                    background: '#1f2937',
-                    color: '#fff',
-                    confirmButtonColor: '#f59e0b'
-                });
-                return;
-            }
-        }        // Confirmation dialog
+        // Time range bounds check (optional: can add generic validation here if needed, 
+        // but overnight shifts where endTime < startTime are now allowed and wrap to next day)        // Confirmation dialog
         const sessionText = formData.sessionType === 'both'
             ? `Morning: ${formData.morningStartTime} - ${formData.morningEndTime}<br/>Evening: ${formData.eveningStartTime} - ${formData.eveningEndTime}`
             : formData.sessionType === 'morning'
@@ -258,7 +216,7 @@ export default function AdminPanel() {
         <div className="min-h-screen bg-gray-100 py-8">
             <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                    Slots Management
+                    Slot Management
                 </h1>
 
                 <form onSubmit={handleCreateSlots} className="space-y-6">
