@@ -52,8 +52,55 @@ export default function AdminPanel() {
             return;
         }
 
-        // Time range bounds check (optional: can add generic validation here if needed, 
-        // but overnight shifts where endTime < startTime are now allowed and wrap to next day)        // Confirmation dialog
+        try {
+            setIsLoading(true);
+            
+            // DRY RUN: Validate overlaps before asking for confirmation
+            if (formData.sessionType === 'morning' || formData.sessionType === 'both') {
+                await appointmentAPI.createSlots({
+                    doctorId: formData.doctorId,
+                    doctorName: formData.doctorName,
+                    startDate: formData.startDate,
+                    endDate: formData.endDate,
+                    startTime: formData.morningStartTime,
+                    endTime: formData.morningEndTime,
+                    duration: formData.duration,
+                    excludeDays: formData.excludeDays,
+                    dryRun: true
+                });
+            }
+
+            if (formData.sessionType === 'evening' || formData.sessionType === 'both') {
+                await appointmentAPI.createSlots({
+                    doctorId: formData.doctorId,
+                    doctorName: formData.doctorName,
+                    startDate: formData.startDate,
+                    endDate: formData.endDate,
+                    startTime: formData.eveningStartTime,
+                    endTime: formData.eveningEndTime,
+                    duration: formData.duration,
+                    excludeDays: formData.excludeDays,
+                    dryRun: true
+                });
+            }
+        } catch (error: any) {
+            setIsLoading(false);
+            console.error('Validation Error:', error);
+            // Show toast/modal error about overlap BEFORE the confirmation pop-up
+            Swal.fire({
+                icon: 'error',
+                title: 'Time Slot Conflict Overview',
+                text: error.message || 'These slots conflict with ones that have already been created or booked. Please adjust your time/duration.',
+                background: '#1f2937',
+                color: '#fff',
+                confirmButtonColor: '#ef4444'
+            });
+            return;
+        }
+
+        setIsLoading(false);
+
+        // Confirmation dialog
         const sessionText = formData.sessionType === 'both'
             ? `Morning: ${formData.morningStartTime} - ${formData.morningEndTime}<br/>Evening: ${formData.eveningStartTime} - ${formData.eveningEndTime}`
             : formData.sessionType === 'morning'
@@ -81,6 +128,7 @@ export default function AdminPanel() {
         });
 
         if (!result.isConfirmed) return;
+        
         try {
             setIsLoading(true);
 

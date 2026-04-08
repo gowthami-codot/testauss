@@ -62,9 +62,10 @@ export async function POST(request: NextRequest) {
             startTime,
             endTime,
             duration = 60,
-            excludeDays = [] // Array of days to exclude (0 = Sunday, 1 = Monday, etc.)
+            excludeDays = [], // Array of days to exclude (0 = Sunday, 1 = Monday, etc.)
+            dryRun = false
         } = body;
-
+        
         // Validate required fields
         if (!doctorId || !doctorName || !startDate || !endDate || !startTime || !endTime) {
             console.log('Missing required fields:', { doctorId, doctorName, startDate, endDate, startTime, endTime });
@@ -88,7 +89,6 @@ export async function POST(request: NextRequest) {
 
         const slotsToCreate = [];
         let skippedBecausePast = 0;
-        let skippedBecauseOverlap = 0;
 
         console.log('Processing dates and time slots...');
         for (const date of dates) {
@@ -143,53 +143,55 @@ export async function POST(request: NextRequest) {
                         break;
                     }
                 }
-
-                if (!hasOverlap) {
-                    let endTimeString = slotEnd.toLocaleTimeString('en-US', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true
-                    }).replace(/\u202F/g, ' ');
-                    
-                    // Standardize midnight output
-                    if (endTimeString.match(/^12:00 AM/i)) {
-                        endTimeString = "12:00 AM";
-                    }
-
-                    const actualDate = new Date(date);
-                    if (isNextDay) {
-                        actualDate.setDate(actualDate.getDate() + 1);
-                    }
-
-                    // Check if slot is in the past (Brisbane time)
-                    const nowBStr = new Date().toLocaleString('en-US', { timeZone: 'Australia/Brisbane' });
-                    const nowB = new Date(nowBStr);
-
-                    // 'date' is created from "YYYY-MM-DD", so UTC methods extract the exact local date components
-                    const slotYear = actualDate.getUTCFullYear();
-                    const slotMonth = actualDate.getUTCMonth();
-                    const slotDay = actualDate.getUTCDate();
-                    
-                    const slotDateTimeCompare = new Date(slotYear, slotMonth, slotDay, slotHrs, slotMins, 0, 0);
-                    
-                    if (slotDateTimeCompare < nowB) {
-                        console.log('Skipping slot because it has passed in Australia/Brisbane time:', timeSlot, 'on', actualDate);
-                        skippedBecausePast++;
-                        continue;
-                    }
-
-                    slotsToCreate.push({
-                        doctorId,
-                        doctorName,
-                        date: actualDate,
-                        startTime: standardizedTimeSlot,
-                        endTime: endTimeString,
-                        duration,
-                        isAvailable: true
-                    });
-                } else {
-                    skippedBecauseOverlap++;
+                if (hasOverlap) {
+                    return NextResponse.json(
+                        { error: `Time conflict detected near ${timeSlot}. A slot or booking already exists during this time. Please adjust your time range or duration and try again.` },
+                        { status: 409 }
+                    );
                 }
+
+                let endTimeString = slotEnd.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                }).replace(/\u202F/g, ' ');
+                
+                // Standardize midnight output
+                if (endTimeString.match(/^12:00 AM/i)) {
+                    endTimeString = "12:00 AM";
+                }
+
+                const actualDate = new Date(date);
+                if (isNextDay) {
+                    actualDate.setDate(actualDate.getDate() + 1);
+                }
+
+                // Check if slot is in the past (Brisbane time)
+                const nowBStr = new Date().toLocaleString('en-US', { timeZone: 'Australia/Brisbane' });
+                const nowB = new Date(nowBStr);
+
+                // 'date' is created from "YYYY-MM-DD", so UTC methods extract the exact local date components
+                const slotYear = actualDate.getUTCFullYear();
+                const slotMonth = actualDate.getUTCMonth();
+                const slotDay = actualDate.getUTCDate();
+                
+                const slotDateTimeCompare = new Date(slotYear, slotMonth, slotDay, slotHrs, slotMins, 0, 0);
+                
+                if (slotDateTimeCompare < nowB) {
+                    console.log('Skipping slot because it has passed in Australia/Brisbane time:', timeSlot, 'on', actualDate);
+                    skippedBecausePast++;
+                    continue;
+                }
+
+                slotsToCreate.push({
+                    doctorId,
+                    doctorName,
+                    date: actualDate,
+                    startTime: standardizedTimeSlot,
+                    endTime: endTimeString,
+                    duration,
+                    isAvailable: true
+                });
             }
         }
 
@@ -197,14 +199,19 @@ export async function POST(request: NextRequest) {
 
         if (slotsToCreate.length === 0) {
             let message = 'No new slots to create (slots may already exist)';
-            if (skippedBecausePast > 0 && skippedBecauseOverlap === 0) {
+            if (skippedBecausePast > 0) {
                 message = 'Cannot create slots for passed date and time.';
-            } else if (skippedBecausePast > 0 && skippedBecauseOverlap > 0) {
-                message = 'No new slots created (some times passed, others already exist).';
             }
 
             return NextResponse.json(
                 { message, count: 0 },
+                { status: 200 }
+            );
+        }
+
+        if (dryRun) {
+            return NextResponse.json(
+                { message: 'Validation successful', count: slotsToCreate.length },
                 { status: 200 }
             );
         }

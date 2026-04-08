@@ -89,6 +89,7 @@ class AppointmentAPI {
         endTime: string;
         duration?: number;
         excludeDays?: number[];
+        dryRun?: boolean;
     }) {
         const response = await fetch(`${this.baseURL}/slots`, {
             method: 'POST',
