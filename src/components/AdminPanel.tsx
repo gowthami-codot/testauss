@@ -1,5 +1,5 @@
 'use client';
-  
+
 import React, { useState } from 'react';
 import { appointmentAPI, dateUtils } from '@/services/appointmentAPI';
 import Swal from 'sweetalert2';
@@ -258,7 +258,7 @@ export default function AdminPanel() {
         <div className="min-h-screen bg-gray-100 py-8">
             <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                    Slot Management
+                    Slots Management
                 </h1>
 
                 <form onSubmit={handleCreateSlots} className="space-y-6">
