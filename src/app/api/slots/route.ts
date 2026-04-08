@@ -120,10 +120,20 @@ export async function POST(request: NextRequest) {
             });
 
             for (const timeSlot of timeSlots) {
-                const slotStart = new Date(`2000-01-01 ${timeSlot}`);
+                const standardizedTimeSlot = timeSlot.replace(/\u202F/g, ' ');
+                const [timeStr, modifier] = standardizedTimeSlot.split(' ');
+                let [slotHrs, slotMins] = timeStr.split(':').map(Number);
+                if (modifier === 'PM' && slotHrs !== 12) slotHrs += 12;
+                if (modifier === 'AM' && slotHrs === 12) slotHrs = 0;
+
+                const [reqStartHr, reqStartMin] = startTime.split(':').map(Number);
+                const isNextDay = slotHrs < reqStartHr || (slotHrs === reqStartHr && slotMins < reqStartMin);
+                const offsetMs = isNextDay ? 24 * 60 * 60 * 1000 : 0;
+
+                const slotStart = new Date(`2000-01-01 ${standardizedTimeSlot}`);
                 const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000);
-                const slotStartMs = slotStart.getTime();
-                const slotEndMs = slotEnd.getTime();
+                const slotStartMs = slotStart.getTime() + offsetMs;
+                const slotEndMs = slotEnd.getTime() + offsetMs;
 
                 // Check for overlaps
                 let hasOverlap = false;
@@ -139,20 +149,12 @@ export async function POST(request: NextRequest) {
                         hour: '2-digit',
                         minute: '2-digit',
                         hour12: true
-                    });
+                    }).replace(/\u202F/g, ' ');
                     
                     // Standardize midnight output
                     if (endTimeString.match(/^12:00 AM/i)) {
                         endTimeString = "12:00 AM";
                     }
-
-                    const [timeStr, modifier] = timeSlot.split(' ');
-                    let [slotHrs, slotMins] = timeStr.split(':').map(Number);
-                    if (modifier === 'PM' && slotHrs !== 12) slotHrs += 12;
-                    if (modifier === 'AM' && slotHrs === 12) slotHrs = 0;
-
-                    const [reqStartHr, reqStartMin] = startTime.split(':').map(Number);
-                    const isNextDay = slotHrs < reqStartHr || (slotHrs === reqStartHr && slotMins < reqStartMin);
 
                     const actualDate = new Date(date);
                     if (isNextDay) {
@@ -180,7 +182,7 @@ export async function POST(request: NextRequest) {
                         doctorId,
                         doctorName,
                         date: actualDate,
-                        startTime: timeSlot,
+                        startTime: standardizedTimeSlot,
                         endTime: endTimeString,
                         duration,
                         isAvailable: true
