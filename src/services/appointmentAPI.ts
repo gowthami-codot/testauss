@@ -119,7 +119,9 @@ class AppointmentAPI {
         if (params?.month) searchParams.set('month', params.month);
         if (params?.date) searchParams.set('date', params.date);
 
-        const response = await fetch(`${this.baseURL}/slots/available?${searchParams}`);
+        const response = await fetch(`${this.baseURL}/slots/available?${searchParams}`, {
+            cache: 'no-store'
+        });
 
         if (!response.ok) {
             throw new Error('Failed to fetch available slots');
@@ -144,7 +146,9 @@ class AppointmentAPI {
         if (params?.endDate) searchParams.set('endDate', params.endDate);
         if (params?.isAvailable !== undefined) searchParams.set('isAvailable', params.isAvailable.toString());
 
-        const response = await fetch(`${this.baseURL}/slots?${searchParams}`);
+        const response = await fetch(`${this.baseURL}/slots?${searchParams}`, {
+            cache: 'no-store'
+        });
 
         if (!response.ok) {
             throw new Error('Failed to fetch slots');

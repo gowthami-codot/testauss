@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { Slot } from '@/models';
 
+export const dynamic = 'force-dynamic';
+
 // GET - Get available slots (optimized for frontend calendar)
 export async function GET(request: NextRequest) {
     try {
