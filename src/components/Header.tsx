@@ -1,11 +1,19 @@
 'use client'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [activeItem, setActiveItem] = useState('Home')
+
+    // Force scroll to top on page refresh
+    useEffect(() => {
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual'
+        }
+        window.scrollTo(0, 0)
+    }, [])
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen)
