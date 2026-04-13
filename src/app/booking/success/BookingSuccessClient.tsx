@@ -15,6 +15,7 @@ interface BookingDetails {
     appointmentTime: string;
     amountPaid: number;
     meetLink?: string;
+    receiptUrl?: string;
 }
 
 export default function BookingSuccessClient() {
@@ -89,12 +90,27 @@ export default function BookingSuccessClient() {
                             A confirmation email has been sent to your email address.
                         </p>
 
-                        <Link
-                            href="/"
-                            className="inline-block px-8 py-3 bg-gradient-to-br from-[#0583F4] to-[#09B9AC] text-white font-semibold hover:opacity-90 transition-opacity"
-                        >
-                            Back to Home
-                        </Link>
+                        <div className="flex flex-col gap-3 pt-2">
+                            {booking?.receiptUrl && (
+                                <a
+                                    href={booking.receiptUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex justify-center items-center gap-2 px-8 py-3 bg-white/10 border border-white/20 text-white font-semibold hover:bg-white/20 transition-all"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Download Invoice Receipt
+                                </a>
+                            )}
+                            <Link
+                                href="/"
+                                className="inline-block px-8 py-3 bg-gradient-to-br from-[#0583F4] to-[#09B9AC] text-white font-semibold hover:opacity-90 transition-opacity"
+                            >
+                                Back to Home
+                            </Link>
+                        </div>
                     </div>
                 )}
 

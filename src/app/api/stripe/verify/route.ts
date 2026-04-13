@@ -16,8 +16,10 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Retrieve the Stripe session
-        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        // Retrieve the Stripe session with expanded payment intent to get receipt URL
+        const session = await stripe.checkout.sessions.retrieve(sessionId, {
+            expand: ['payment_intent.latest_charge']
+        });
 
         if (session.payment_status !== 'paid') {
             return NextResponse.json(
@@ -25,6 +27,9 @@ export async function GET(request: NextRequest) {
                 { status: 400 }
             );
         }
+
+        const paymentIntent = session.payment_intent as any;
+        const receiptUrl = paymentIntent?.latest_charge?.receipt_url || null;
 
         // Look up the appointment by stripeSessionId
         await connectDB();
@@ -38,10 +43,11 @@ export async function GET(request: NextRequest) {
                 booking: {
                     service: session.metadata?.service || 'Consultation',
                     patientName: session.metadata?.patientName || '',
-                    amountPaid: parseInt(session.metadata?.amount || '0'),
+                    amountPaid: parseFloat(session.metadata?.amount || '0'),
                     meetLink: null,
                     appointmentDate: null,
                     appointmentTime: null,
+                    receiptUrl,
                 },
             });
         }
@@ -54,6 +60,7 @@ export async function GET(request: NextRequest) {
                 appointmentTime: appointment.appointmentTime,
                 amountPaid: appointment.amountPaid,
                 meetLink: appointment.meetLink || null,
+                receiptUrl,
             },
         });
     } catch (error: any) {

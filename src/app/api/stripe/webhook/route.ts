@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
                     appointmentDate: slot.date,
                     appointmentTime: slot.startTime,
                     status: 'pending_confirmation',
-                    amountPaid: parseInt(amount) || 0,
+                    amountPaid: parseFloat(amount) || 0,
                     paymentStatus: 'paid',
                     stripeSessionId: session.id,
                     isMedicare: isMedicare === 'true',
