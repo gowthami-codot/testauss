@@ -143,17 +143,17 @@ export default function BookingAppointment() {
                     // Option 1 = $0
                     return { amount: 0, isBulkBilled: true, patientType };
                 } else {
-                    // Options 2, 3, 4 = $0.50 for testing limit
-                    return { amount: 0.50, isBulkBilled: false, patientType };
+                    // Options 2, 3, 4 = $64
+                    return { amount: 64, isBulkBilled: false, patientType };
                 }
             }
         }
 
         // Non-Medicare cases below
         if (isReturning) {
-            return { amount: 0.50, isBulkBilled: false, patientType }; // was $32
+            return { amount: 32, isBulkBilled: false, patientType };
         }
-        return { amount: 0.50, isBulkBilled: false, patientType }; // was $64
+        return { amount: 64, isBulkBilled: false, patientType };
     }, [isMedicareHolder, patientHistory, formData.service]);
 
     const handleProceedToBilling = () => {
