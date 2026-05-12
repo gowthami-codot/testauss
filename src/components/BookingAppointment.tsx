@@ -126,27 +126,10 @@ export default function BookingAppointment() {
     // Billing calculation
     const calculateBilling = useCallback(() => {
         const isReturning = patientHistory?.hasPreviousBooking ?? false;
-        const hasInPersonThisYear = patientHistory?.hasInPersonThisYear ?? false;
         const patientType = isReturning ? 'Returning' : 'New';
 
-        // Definitions for options
-        const isOption1 = formData.service === 'In Person - New Patient Consultation';
-
         if (isMedicareHolder) {
-            if (hasInPersonThisYear) {
-                // Medicare + Has in-person visit this calendar year
-                // Cost: $0 Bulk Billed for all enabled options
-                return { amount: 0, isBulkBilled: true, patientType };
-            } else {
-                // Medicare + No in-person visit this calendar year
-                if (isOption1) {
-                    // Option 1 = $0
-                    return { amount: 0, isBulkBilled: true, patientType };
-                } else {
-                    // Options 2, 3, 4 = $64
-                    return { amount: 64, isBulkBilled: false, patientType };
-                }
-            }
+            return { amount: 0, isBulkBilled: true, patientType };
         }
 
         // Non-Medicare cases below
