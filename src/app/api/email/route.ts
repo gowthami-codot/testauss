@@ -66,7 +66,10 @@ function createAppointmentConfirmationEmail(
     type?: string,
     appointmentId?: string,
     refundNote?: string,
-    baseUrl?: string
+    baseUrl?: string,
+    isMedicare?: boolean,
+    amountPaid?: number,
+    paymentStatus?: string
 ) {
     // Scott's contact details
     const scottEmail = "scotty.stringer@outlook.com";
@@ -206,6 +209,13 @@ function createAppointmentConfirmationEmail(
                                 <div style="margin-top: 5px; font-size: 12px; color: #64748b; word-break: break-all;">${meetLink}</div>
                             </td>
                         </tr>` : ''}
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Amount Paid:</td>
+                            <td style="padding: 8px 0; color: #1e293b;">
+                                $${(amountPaid || 0).toFixed(2)} 
+                                ${paymentStatus ? `<span style="font-size: 12px; font-weight: bold; margin-left: 5px; color: ${paymentStatus === 'paid' ? '#16a34a' : paymentStatus === 'refunded' ? '#dc2626' : '#2563eb'};">(${paymentStatus.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())})</span>` : ''}
+                            </td>
+                        </tr>
                     </table>
                 </div>
 
@@ -224,6 +234,10 @@ function createAppointmentConfirmationEmail(
                         <tr>
                             <td style="padding: 8px 0; font-weight: bold; color: #475569;">Mobile:</td>
                             <td style="padding: 8px 0; color: #1e293b;"><a href="tel:${patientMobile}" style="color: #2563eb; text-decoration: none;">${patientMobile}</a></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Medicare Card:</td>
+                            <td style="padding: 8px 0; color: #1e293b;">${isMedicare ? 'Yes ✅' : 'No'}</td>
                         </tr>
                     </table>
                 </div>
@@ -392,7 +406,10 @@ function createAppointmentTextContent(
     appointmentTime: string,
     notes?: string,
     meetLink?: string,
-    type?: string
+    type?: string,
+    isMedicare?: boolean,
+    amountPaid?: number,
+    paymentStatus?: string
 ) {
     return `
 AUSSIEMALE - APPOINTMENT CONFIRMATION
@@ -409,12 +426,14 @@ Date: ${new Date(appointmentDate).toLocaleDateString('en-AU', {
         day: 'numeric'
     })}
 Time: ${appointmentTime}
+Amount Paid: $${(amountPaid || 0).toFixed(2)} ${paymentStatus ? `(${paymentStatus.replace('_', ' ').toUpperCase()})` : ''}
 ${meetLink && type === 'confirmed' ? `\nVIDEO CONSULTATION LINK:\nJoin here: ${meetLink}\n` : ''}
 PATIENT INFORMATION:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Name: ${patientName}
 Email: ${patientEmail}
 Mobile: ${patientMobile}
+Medicare Card: ${isMedicare ? 'Yes ✅' : 'No'}
 
 ${notes ? `ADDITIONAL NOTES:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -498,7 +517,7 @@ export async function POST(request: NextRequest) {
         const isAppointmentBooking = body.patientName && body.appointmentDate;
 
         let name, email, phone, services, hearAbout, additionalInfo;
-        let doctorName, appointmentDate, appointmentTime, notes, meetLink, type, appointmentId, refundNote;
+        let doctorName, appointmentDate, appointmentTime, notes, meetLink, type, appointmentId, refundNote, isMedicare, amountPaid, paymentStatus;
 
         if (isAppointmentBooking) {
             // Appointment booking fields
@@ -514,7 +533,10 @@ export async function POST(request: NextRequest) {
                 meetLink,
                 type,
                 appointmentId,
-                refundNote
+                refundNote,
+                isMedicare,
+                amountPaid,
+                paymentStatus
             } = body);
 
             // Validate required fields for appointment
@@ -573,12 +595,12 @@ export async function POST(request: NextRequest) {
 
         // Create professional HTML email content
         const htmlContent = isAppointmentBooking
-            ? createAppointmentConfirmationEmail(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, false, meetLink, type, appointmentId, refundNote, baseUrl)
+            ? createAppointmentConfirmationEmail(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, false, meetLink, type, appointmentId, refundNote, baseUrl, isMedicare, amountPaid, paymentStatus)
             : createContactFormEmail(name, email, phone, services, hearAbout, additionalInfo);
 
         // Create plain text version
         const textContent = isAppointmentBooking
-            ? createAppointmentTextContent(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, meetLink, type)
+            ? createAppointmentTextContent(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, meetLink, type, isMedicare, amountPaid, paymentStatus)
             : createContactFormTextContent(name, email, phone, services, hearAbout, additionalInfo);
 
         // Use your verified sender address below:
@@ -587,8 +609,8 @@ export async function POST(request: NextRequest) {
         // Email to owner
         const ownerEmailData = {
             from: verifiedSender,
-            to: ['scotty.stringer@outlook.com'],
-            // to: ['gowthami.codot@gmail.com'],
+            // to: ['scotty.stringer@outlook.com'],
+            to: ['gowthami.codot@gmail.com'],
             replyTo: email,
             subject: subject,
             html: htmlContent,
@@ -610,8 +632,8 @@ export async function POST(request: NextRequest) {
             if (type === 'rejected') userSubject = `Your Appointment is Rejected - ${services} with ${doctorName} - AussieMale`;
             if (type === 'booking_request') userSubject = `Your Booking Request is Processing - ${services} with ${doctorName} - AussieMale`;
 
-            const userHtmlContent = createAppointmentConfirmationEmail(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, true, meetLink, type, appointmentId, refundNote);
-            const userTextContent = createAppointmentTextContent(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, meetLink, type);
+            const userHtmlContent = createAppointmentConfirmationEmail(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, true, meetLink, type, appointmentId, refundNote, baseUrl, isMedicare, amountPaid, paymentStatus);
+            const userTextContent = createAppointmentTextContent(name, email, phone, services, doctorName, appointmentDate, appointmentTime, additionalInfo, meetLink, type, isMedicare, amountPaid, paymentStatus);
             const userEmailData = {
                 from: verifiedSender,
                 to: [email],

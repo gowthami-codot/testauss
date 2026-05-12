@@ -117,7 +117,10 @@ export async function GET(request: NextRequest) {
                         appointmentTime: appointment.appointmentTime,
                         meetLink: appointment.meetLink,
                         notes: appointment.notes,
-                        type: 'confirmed'
+                        type: 'confirmed',
+                        isMedicare: appointment.isMedicare,
+                        amountPaid: appointment.amountPaid,
+                        paymentStatus: appointment.paymentStatus
                     }),
                 });
             } catch (err) {
@@ -178,7 +181,10 @@ export async function GET(request: NextRequest) {
                         appointmentDate: appointment.appointmentDate,
                         appointmentTime: appointment.appointmentTime,
                         type: 'rejected',
-                        refundNote
+                        refundNote,
+                        isMedicare: appointment.isMedicare,
+                        amountPaid: appointment.amountPaid,
+                        paymentStatus: appointment.paymentStatus
                     }),
                 });
             } catch (err) {

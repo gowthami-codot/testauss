@@ -376,7 +376,7 @@ export default function BookingAppointment() {
         // Deduplicate slots by start time
         const uniqueSlots = [];
         const seenTimes = new Set();
-        
+
         for (const slot of slots) {
             if (!seenTimes.has(slot.startTime)) {
                 seenTimes.add(slot.startTime);
@@ -817,7 +817,7 @@ export default function BookingAppointment() {
                                                     <svg className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                                     </svg>
-                                                    <span>Eligible services are 100% bulk billed, meaning there is no out-of-pocket cost where Medicare criteria are met.</span>
+                                                    <span>By selecting Medicare Hold, you acknowledge that consultation fees, if applicable, are solely at the discretion of the consulting professional and will not be charged through our platform.</span>
                                                 </div>
                                             )}
 

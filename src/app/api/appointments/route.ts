@@ -161,7 +161,10 @@ export async function POST(request: NextRequest) {
                         meetLink,
                         notes,
                         appointmentId: appointment._id.toString(),
-                        type: 'booking_request'
+                        type: 'booking_request',
+                        isMedicare: appointment.isMedicare,
+                        amountPaid: appointment.amountPaid,
+                        paymentStatus: appointment.paymentStatus
                     }),
                 });
 
